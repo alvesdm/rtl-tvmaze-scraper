@@ -6,20 +6,20 @@ using TvMazeScraper.Application.Extensions;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
 
-namespace TvMazeScraper.Application;
+namespace TvMazeScraper.Application.Business.Shows;
 
 public class TVMazeShowScraper : ITVShowScraper
 {
     private readonly ILogger<TVMazeShowScraper> _logger;
     private readonly IConfiguration _configuration;
     private readonly ITVShowApiClient _tvShowApiClient;
-    private readonly IShowService _showService;
+    private readonly IScraperRepository _showService;
 
     public TVMazeShowScraper(
         ILogger<TVMazeShowScraper> logger,
         IConfiguration configuration,
         ITVShowApiClient tvShowApiClient,
-        IShowService showService)
+        IScraperRepository showService)
     {
         _logger = logger;
         _configuration = configuration;
@@ -29,7 +29,7 @@ public class TVMazeShowScraper : ITVShowScraper
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var apiPage =  await GetApiPageAsync();
+        var apiPage = await GetApiPageAsync();
 
         while (!cancellationToken.IsCancellationRequested)
         {

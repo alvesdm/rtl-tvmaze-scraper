@@ -1,28 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
+using TvMazeScraper.Application.Api.Models;
+using TvMazeScraper.Application.Business.Commands;
 
 namespace TvMazeScraper.Api.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ShowsController : ControllerBase
+    public class ShowsController : ApiControllerBase
     {
-        private readonly ILogger<ShowsController> _logger;
-
-        public ShowsController(ILogger<ShowsController> logger)
+        [HttpGet]
+        [Route("{PageSize:int}/{Page:int}")]
+        public async Task<IActionResult> Get([FromRoute] GetShowsCommand command)
         {
-            _logger = logger;
-        }
-
-        [HttpGet(Name = "Shows")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            var showsResult = await Mediator.Send(command);
+            return Ok(showsResult.Shows);
         }
     }
 }

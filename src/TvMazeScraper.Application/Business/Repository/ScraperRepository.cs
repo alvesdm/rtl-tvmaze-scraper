@@ -4,26 +4,23 @@ using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
 
-namespace TvMazeScraper.Application;
-
-public class ShowService : IShowService
+namespace TvMazeScraper.Application.Business.Repository;
+/// <summary>
+/// EF doesnt do well with parallel tasks, that's when Dapper comes in handy
+/// </summary>
+public class ScraperRepository : IScraperRepository
 {
     private readonly IDbContext _dbContext;
 
-    public ShowService(
+    public ScraperRepository(
         IDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
-    public IDbConnection CreateSession()
+    public async Task<Show> LastShowAsync()
     {
-        return _dbContext.CreateConnection();
-    }
-
-    public async Task<Show> LastShowAsync(IDbConnection cnn = default)
-    {
-        using (var connection = cnn ?? _dbContext.CreateConnection())
+        using (var connection = _dbContext.CreateConnection())
         {
             var show = await connection.QueryFirstOrDefaultAsync<Show>(@$"
 SELECT 
@@ -36,9 +33,9 @@ SELECT
         }
     }
 
-    public async Task<bool> TryAddCastAsync(Cast cast, IDbConnection cnn = default)
+    public async Task<bool> TryAddCastAsync(Cast cast)
     {
-        using (var connection = cnn ?? _dbContext.CreateConnection())
+        using (var connection = _dbContext.CreateConnection())
         {
             var count = await connection.QueryFirstAsync<int>(@$"
 SELECT 
@@ -65,10 +62,10 @@ INSERT
 select last_insert_rowid();", new
             {
                 UniqueId = Guid.NewGuid(),
-                ExternalId = cast.ExternalId,
-                ShowId = cast.ShowId,
-                Name = cast.Name,
-                Birthday = cast.Birthday
+                cast.ExternalId,
+                cast.ShowId,
+                cast.Name,
+                cast.Birthday
             });
 
             cast.Id = id;
@@ -76,9 +73,9 @@ select last_insert_rowid();", new
         }
     }
 
-    public async Task<bool> TryAddShowAsync(Show show, IDbConnection cnn = default)
+    public async Task<bool> TryAddShowAsync(Show show)
     {
-        using (var connection = cnn ?? _dbContext.CreateConnection())
+        using (var connection = _dbContext.CreateConnection())
         {
             var count = await connection.QueryFirstAsync<int>(@$"
 SELECT 
@@ -103,8 +100,8 @@ INSERT
 select last_insert_rowid();", new
             {
                 UniqueId = Guid.NewGuid(),
-                ExternalId = show.ExternalId,
-                Name = show.Name
+                show.ExternalId,
+                show.Name
             });
 
             show.Id = id;

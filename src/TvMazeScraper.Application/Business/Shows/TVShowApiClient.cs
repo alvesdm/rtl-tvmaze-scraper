@@ -1,10 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using TvMazeScraper.Application.Api.Models;
 using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
 
-namespace TvMazeScraper.Application;
+namespace TvMazeScraper.Application.Business.Shows;
 
 public class TVShowApiClient : ITVShowApiClient
 {
@@ -34,10 +35,10 @@ public class TVShowApiClient : ITVShowApiClient
             return new Result<IEnumerable<Cast>>(new Exception("Opssss! TODO"));
         }
 
-        var persons = JsonConvert.DeserializeObject<List<CastModel>>(await response.Content.ReadAsStringAsync());
+        var persons = JsonConvert.DeserializeObject<List<TVMazeCastModel>>(await response.Content.ReadAsStringAsync());
 
 
-        return new Result<IEnumerable<Cast>>(persons.Select(p=> new Cast 
+        return new Result<IEnumerable<Cast>>(persons.Select(p => new Cast
         {
             ExternalId = p.Person.Id,
             Name = p.Person.Name,
@@ -54,41 +55,22 @@ public class TVShowApiClient : ITVShowApiClient
 
         if (!response.IsSuccessStatusCode)
         {
-            if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return new Result<IEnumerable<Show>>(new Exception("No such page.We might have finished our scraping process."));
             }
 
             return new Result<IEnumerable<Show>>(new Exception("Opssss! TODO"));
-            
+
             ///Error 429, is handled by polly
         }
 
-        var shows = JsonConvert.DeserializeObject<List<ShowModel>>(await response.Content.ReadAsStringAsync());
+        var shows = JsonConvert.DeserializeObject<List<TVMazeShowModel>>(await response.Content.ReadAsStringAsync());
 
-        return new Result<IEnumerable<Show>>(shows.Select(p=>new Show
+        return new Result<IEnumerable<Show>>(shows.Select(p => new Show
         {
             ExternalId = p.Id,
             Name = p.Name
         }));
     }
-}
-
-
-public struct CastModel
-{
-    public PersonModel Person { get; set; }
-}
-
-public struct PersonModel
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public DateTime? Birthday { get; set; }
-}
-
-public struct ShowModel
-{
-    public int Id { get; set; }
-    public string Name { get; set; }
 }

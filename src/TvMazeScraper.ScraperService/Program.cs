@@ -1,13 +1,13 @@
-using TvMazeScraper.Application;
-using TvMazeScraper.Infrastructure;
+using TvMazeScraper.Application.IoC;
+using TvMazeScraper.Infrastructure.IoC;
 using TvMazeScraper.ScraperService;
 using TvMazeScraper.ScraperService.Bootstrap;
 
 IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices(services =>
     {
-        services.AddInfrastructure();
-        services.AddApplication();
+        services.AddInfrastructure(true);
+        services.AddApplication(true);
         services.AddHostedService<Worker>();
     })
     .Build();
