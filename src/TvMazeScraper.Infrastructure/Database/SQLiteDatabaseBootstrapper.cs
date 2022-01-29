@@ -2,15 +2,13 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using System.Data;
+using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Interfaces;
 
 namespace TvMazeScraper.Infrastructure.Database;
 
 public class SQLiteDatabaseBootstrapper : IDatabaseBootstrapper
 {
-    private const string TABLE_SHOWS_NAME = "Shows";
-    private const string TABLE_CASTING_NAME = "Casting";
-
     private readonly IConfiguration _configuration;
     private readonly IDbContext _dbContext;
 
@@ -38,15 +36,15 @@ public class SQLiteDatabaseBootstrapper : IDatabaseBootstrapper
 SELECT name 
     FROM sqlite_master 
     WHERE type='table' 
-        AND name = '{TABLE_CASTING_NAME}'
+        AND name = '{DatabaseConstants.TABLE_CASTING_NAME}'
 ;");
 
         var tableName = table.FirstOrDefault();
-        if (!string.IsNullOrEmpty(tableName) && tableName == TABLE_CASTING_NAME)
+        if (!string.IsNullOrEmpty(tableName) && tableName == DatabaseConstants.TABLE_CASTING_NAME)
             return;
 
         await connection.ExecuteAsync(@$"
-CREATE TABLE {TABLE_CASTING_NAME} (
+CREATE TABLE {DatabaseConstants.TABLE_CASTING_NAME} (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     UniqueId TEXT NOT NULL,
     ExternalId INTEGER NOT NULL,
@@ -58,7 +56,7 @@ CREATE TABLE {TABLE_CASTING_NAME} (
         await connection.ExecuteAsync(@$"
 CREATE INDEX 
     IX_Birthday 
-    ON {TABLE_CASTING_NAME}
+    ON {DatabaseConstants.TABLE_CASTING_NAME}
         (Birthday DESC)
 ;");
     }
@@ -69,15 +67,15 @@ CREATE INDEX
 SELECT name 
     FROM sqlite_master 
     WHERE type='table' 
-        AND name = '{TABLE_SHOWS_NAME}'
+        AND name = '{DatabaseConstants.TABLE_SHOWS_NAME}'
 ;");
 
         var tableName = table.FirstOrDefault();
-        if (!string.IsNullOrEmpty(tableName) && tableName == TABLE_SHOWS_NAME)
+        if (!string.IsNullOrEmpty(tableName) && tableName == DatabaseConstants.TABLE_SHOWS_NAME)
             return;
 
         await connection.ExecuteAsync(@$"
-CREATE TABLE {TABLE_SHOWS_NAME} (
+CREATE TABLE {DatabaseConstants.TABLE_SHOWS_NAME} (
     Id INTEGER PRIMARY KEY AUTOINCREMENT,
     UniqueId TEXT NOT NULL,
     ExternalId INTEGER NOT NULL,

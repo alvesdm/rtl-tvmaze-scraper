@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
 
@@ -14,7 +15,7 @@ public class TVShowApiClient : ITVShowApiClient
         IConfiguration configuration,
         HttpClient httpClient)
     {
-        httpClient.BaseAddress = new Uri(configuration.GetValue<string>("TVMazeApi:BaseUri"));
+        httpClient.BaseAddress = new Uri(configuration.GetValue<string>(ConfigurationConstants.TVMAZEAPI_BASEURI));
 
         _configuration = configuration;
         _httpClient = httpClient;
@@ -53,7 +54,14 @@ public class TVShowApiClient : ITVShowApiClient
 
         if (!response.IsSuccessStatusCode)
         {
+            if(response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new Result<IEnumerable<Show>>(new Exception("No such page.We might have finished our scraping process."));
+            }
+
             return new Result<IEnumerable<Show>>(new Exception("Opssss! TODO"));
+            
+            ///Error 429, is handled by polly
         }
 
         var shows = JsonConvert.DeserializeObject<List<ShowModel>>(await response.Content.ReadAsStringAsync());

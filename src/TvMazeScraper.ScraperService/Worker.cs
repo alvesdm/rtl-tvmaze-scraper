@@ -25,11 +25,6 @@ public class Worker : BackgroundService
     {
         await _tvShowScraper.StartAsync(stoppingToken);
         _logger.LogInformation("Done! We are finished.");
-        //while (!stoppingToken.IsCancellationRequested)
-        //{
-        //    _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-        //    await Task.Delay(1000, stoppingToken);
-        //}
     }
 }
 

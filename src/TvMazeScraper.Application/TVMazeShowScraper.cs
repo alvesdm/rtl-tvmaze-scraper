@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Transactions;
+using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Extensions;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
@@ -28,7 +29,7 @@ public class TVMazeShowScraper : ITVShowScraper
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var apiPage = await GetApiPageAsync();
+        var apiPage =  await GetApiPageAsync();
 
         while (!cancellationToken.IsCancellationRequested)
         {
@@ -59,19 +60,15 @@ public class TVMazeShowScraper : ITVShowScraper
                     }
                 }
             }
-        }, _configuration.GetValue<int>("MaxDegreeOfParallelism:ShowsEndPoint"));
+        }, _configuration.GetValue<int>(ConfigurationConstants.MAXDEGREEOFPARALLELISM_SHOWSENDPOINT));
     }
 
     private async Task ProcessCastingAsync(List<Cast> casts)
     {
-        //optimizing a bit the use of the connection, as it should be a quick batch and the DB is local
-        //using (var cnn = _showService.CreateSession())
-        //{
         await casts.AsyncParallelForEach(async cast =>
         {
-            await _showService.TryAddCastAsync(cast);//, cnn);
-        }, _configuration.GetValue<int>("MaxDegreeOfParallelism:CastingEndPoint"));
-        //}
+            await _showService.TryAddCastAsync(cast);
+        }, _configuration.GetValue<int>(ConfigurationConstants.MAXDEGREEOFPARALLELISM_CASTINGENDPOINT));
     }
 
     private async Task<int> GetApiPageAsync()
@@ -79,6 +76,6 @@ public class TVMazeShowScraper : ITVShowScraper
         var lastShow = await _showService.LastShowAsync();
         return lastShow == null
             ? 0
-            : Convert.ToInt32(Math.Floor(lastShow.ExternalId / 250M));
+            : Convert.ToInt32(Math.Floor(lastShow.ExternalId / _configuration.GetValue<decimal>(ConfigurationConstants.TVMAZEAPI_SHOWSPAGESIZE)));
     }
 }

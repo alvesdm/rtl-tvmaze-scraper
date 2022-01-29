@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using System.Data;
+using TvMazeScraper.Application.Constants;
 using TvMazeScraper.Application.Interfaces;
 using TvMazeScraper.Domain.Entities;
 
@@ -7,9 +8,6 @@ namespace TvMazeScraper.Application;
 
 public class ShowService : IShowService
 {
-    private const string TABLE_SHOWS_NAME = "Shows";
-    private const string TABLE_CASTING_NAME = "Casting";
-
     private readonly IDbContext _dbContext;
 
     public ShowService(
@@ -30,8 +28,8 @@ public class ShowService : IShowService
             var show = await connection.QueryFirstOrDefaultAsync<Show>(@$"
 SELECT 
     * 
-    FROM {TABLE_SHOWS_NAME} 
-    ORDER BY {nameof(Show.Id)} DESC
+    FROM {DatabaseConstants.TABLE_SHOWS_NAME} 
+    ORDER BY {nameof(Show.ExternalId)} DESC
     LIMIT 1
 ;");
             return show;
@@ -45,7 +43,7 @@ SELECT
             var count = await connection.QueryFirstAsync<int>(@$"
 SELECT 
     COUNT(0) 
-    FROM {TABLE_CASTING_NAME} 
+    FROM {DatabaseConstants.TABLE_CASTING_NAME} 
     WHERE {nameof(Cast.ExternalId)} = {cast.ExternalId}
 ;");
             if (count > 0)
@@ -55,7 +53,7 @@ SELECT
 
             var id = await connection.ExecuteScalarAsync<int>(@$"
 INSERT 
-    INTO {TABLE_CASTING_NAME} 
+    INTO {DatabaseConstants.TABLE_CASTING_NAME} 
     ({nameof(Cast.UniqueId)},
     {nameof(Cast.ExternalId)},
     {nameof(Cast.ShowId)},
@@ -85,7 +83,7 @@ select last_insert_rowid();", new
             var count = await connection.QueryFirstAsync<int>(@$"
 SELECT 
     COUNT(0) 
-    FROM {TABLE_SHOWS_NAME} 
+    FROM {DatabaseConstants.TABLE_SHOWS_NAME} 
     WHERE {nameof(Cast.ExternalId)} = {show.ExternalId}
 ;");
             if (count > 0)
@@ -95,7 +93,7 @@ SELECT
 
             var id = await connection.ExecuteScalarAsync<int>(@$"
 INSERT 
-    INTO {TABLE_SHOWS_NAME} 
+    INTO {DatabaseConstants.TABLE_SHOWS_NAME} 
     ({nameof(Show.UniqueId)},
     {nameof(Show.ExternalId)},
     {nameof(Show.Name)})
