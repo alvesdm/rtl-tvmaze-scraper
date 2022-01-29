@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
         {
             services.AddHttpClient<ITVShowApiClient, TVShowApiClient>()
                 .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-                .AddPolicyHandler(HttpHandlerPolicies.Get409RetryPolicy());
+                .AddPolicyHandler((services, request) => HttpHandlerPolicies.Get409RetryPolicy(services));
             services.AddTransient<ITVShowScraper, TVMazeShowScraper>();
             services.AddTransient<IScraperRepository, ScraperRepository>();
         }

@@ -60,7 +60,7 @@ public class TVShowApiClient : ITVShowApiClient
                 return new Result<IEnumerable<Show>>(new Exception("No such page.We might have finished our scraping process."));
             }
 
-            return new Result<IEnumerable<Show>>(new Exception("Opssss! TODO"));
+            return new Result<IEnumerable<Show>>(new Exception("Opssss! Something went real bad."));
 
             ///Error 429, is handled by polly
         }
